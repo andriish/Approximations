@@ -10,7 +10,6 @@
 
 #include <cmath>
 #include <limits>
-#include <boost/config.hpp>
 
 // inspired by the paper "New close form approximations of ln(1+x) by Khattri
 // uses approximation (a*x + b)/(c*x + d)
@@ -26,15 +25,15 @@ inline T fastLog2p1(const T value) {
     const T c = 0.60987486544988612;
     const T d = 0.43559347328148307;
 
-    if(BOOST_UNLIKELY(!std::isfinite(value))) {
-        return value == std::numeric_limits<T>::infinity() ? value : nan("1");
-    } else if(BOOST_LIKELY(value > 0)) {
+    if (!std::isfinite(value)) [[unlikely]] {
+        return value == std::numeric_limits<T>::infinity() ? value : std::nan("1");
+    } else if (value > 0) [[likely]] {
         int iExp;
-        T dM = frexp(value, &iExp);
+        T dM = std::frexp(value, &iExp);
 
-        T x = 1.0/(c*dM + d);
+        T x = 1.0 / (c * dM + d);
 
-        return iExp + x * (a*dM + b);
+        return static_cast<T>(iExp) + x * (a * dM + b);
     } else {
         return value == 0 ? -std::numeric_limits<T>::infinity() : -std::nan("1");
     }
@@ -56,16 +55,16 @@ inline T fastLog2p2(const T value) {
     const T e = 1.426594307123505;
     const T f = 0.2533316901691966;
 
-    if(BOOST_UNLIKELY(!std::isfinite(value))) {
-        return value == std::numeric_limits<T>::infinity() ? value : nan("1");
-    } else if(BOOST_LIKELY(value > 0)) {
+    if (!std::isfinite(value)) [[unlikely]] {
+        return value == std::numeric_limits<T>::infinity() ? value : std::nan("1");
+    } else if (value > 0) [[likely]] {
         int iExp;
-        T dM = frexp(value, &iExp);
+        T dM = std::frexp(value, &iExp);
         T dM2 = dM * dM;
 
-        T x = 1.0/(d*dM2 + e*dM + f);
+        T x = 1.0 / (d * dM2 + e * dM + f);
 
-        return iExp + x * (a*dM2 + b*dM + c);
+        return static_cast<T>(iExp) + x * (a * dM2 + b * dM + c);
     } else {
         return value == 0 ? -std::numeric_limits<T>::infinity() : -std::nan("1");
     }
@@ -89,17 +88,17 @@ inline T fastLog2p3(const T value) {
     const T g = 1.071708023446889;
     const T h = 0.084444549259932208;
 
-    if(BOOST_UNLIKELY(!std::isfinite(value))) {
-        return value == std::numeric_limits<T>::infinity() ? value : nan("1");
-    } else if(BOOST_LIKELY(value > 0)) {
+    if (!std::isfinite(value)) [[unlikely]] {
+        return value == std::numeric_limits<T>::infinity() ? value : std::nan("1");
+    } else if (value > 0) [[likely]] {
         int iExp;
-        T dM = frexp(value, &iExp);
+        T dM = std::frexp(value, &iExp);
         T dM2 = dM * dM;
         T dM3 = dM * dM2;
 
-        T x = 1.0/(e*dM3 + f*dM2 + g*dM + h);
+        T x = 1.0 / (e * dM3 + f * dM2 + g * dM + h);
 
-        return iExp + x * (a*dM3 + b*dM2 + c*dM + d);
+        return static_cast<T>(iExp) + x * (a * dM3 + b * dM2 + c * dM + d);
     } else {
         return value == 0 ? -std::numeric_limits<T>::infinity() : -std::nan("1");
     }
@@ -125,18 +124,18 @@ inline T fastLog2p4(const T value) {
     const T i = 0.63680961689938775;
     const T j = 0.028211791264274255;
 
-    if(BOOST_UNLIKELY(!std::isfinite(value))) {
-        return value == std::numeric_limits<T>::infinity() ? value : nan("1");
-    } else if(BOOST_LIKELY(value > 0)) {
+    if (!std::isfinite(value)) [[unlikely]] {
+        return value == std::numeric_limits<T>::infinity() ? value : std::nan("1");
+    } else if (value > 0) [[likely]] {
         int iExp;
-        T dM = frexp(value, &iExp);
+        T dM = std::frexp(value, &iExp);
         T dM2 = dM * dM;
         T dM3 = dM * dM2;
         T dM4 = dM2 * dM2;
 
-        T x = 1.0/(((f*dM4 + h*dM2) + (g*dM3 + i*dM)) + j);
+        T x = 1.0 / (((f * dM4 + h * dM2) + (g * dM3 + i * dM)) + j);
 
-        return iExp + x * (((a*dM4 + c*dM2) + (b*dM3 + d*dM)) + e);
+        return static_cast<T>(iExp) + x * (((a * dM4 + c * dM2) + (b * dM3 + d * dM)) + e);
     } else {
         return value == 0 ? -std::numeric_limits<T>::infinity() : -std::nan("1");
     }
@@ -166,19 +165,19 @@ inline T fastLog2p5(const T value) {
     const T k = 1.037334812091420754854e+00;
     const T l = 2.900560762872882170083e-02;
 
-    if(BOOST_UNLIKELY(!std::isfinite(value))) {
-        return value == std::numeric_limits<T>::infinity() ? value : nan("1");
-    } else if(BOOST_LIKELY(value > 0)) {
+    if (!std::isfinite(value)) [[unlikely]] {
+        return value == std::numeric_limits<T>::infinity() ? value : std::nan("1");
+    } else if (value > 0) [[likely]] {
         int iExp;
-        T dM = frexp(value, &iExp);
+        T dM = std::frexp(value, &iExp);
         T dM2 = dM * dM;
         T dM3 = dM * dM2;
         T dM4 = dM2 * dM2;
         T dM5 = dM2 * dM3;
 
-        T x = 1.0/((g*dM5 + l) + (h*dM4 + j*dM2) + (i*dM3 + k*dM));
+        T x = 1.0 / ((g * dM5 + l) + (h * dM4 + j * dM2) + (i * dM3 + k * dM));
 
-        return iExp + x * ((a*dM5 + f) + (b*dM4 + d*dM2) + c*dM3 + e*dM);
+        return static_cast<T>(iExp) + x * ((a * dM5 + f) + (b * dM4 + d * dM2) + c * dM3 + e * dM);
     } else {
         return value == 0 ? -std::numeric_limits<T>::infinity() : -std::nan("1");
     }
@@ -208,20 +207,20 @@ inline T fastLog2p6(const T value) {
     const T m = 9.581795852523320444760e-01L;
     const T n = 1.851054408942580734032e-02L;
 
-    if(BOOST_UNLIKELY(!std::isfinite(value))) {
-        return value == std::numeric_limits<T>::infinity() ? value : nan("1");
-    } else if(BOOST_LIKELY(value > 0)) {
+    if (!std::isfinite(value)) [[unlikely]] {
+        return value == std::numeric_limits<T>::infinity() ? value : std::nan("1");
+    } else if (value > 0) [[likely]] {
         int iExp;
-        T dM = frexp(value, &iExp);
+        T dM = std::frexp(value, &iExp);
         T dM2 = dM * dM;
         T dM3 = dM * dM2;
         T dM4 = dM2 * dM2;
         T dM5 = dM2 * dM3;
         T dM6 = dM3 * dM3;
 
-        T x = 1.0/((((h*dM6 + n) + (i*dM5 + m*dM)) + (j*dM4 + l*dM2)) + k*dM3);
+        T x = 1.0 / ((((h * dM6 + n) + (i * dM5 + m * dM)) + (j * dM4 + l * dM2)) + k * dM3);
 
-        return iExp + x * (((((a*dM6 + g) + (c*dM4 + d*dM3)) + b*dM5) + f*dM) + e*dM2);
+        return static_cast<T>(iExp) + x * (((((a * dM6 + g) + (c * dM4 + d * dM3)) + b * dM5) + f * dM) + e * dM2);
     } else {
         return value == 0 ? -std::numeric_limits<T>::infinity() : -std::nan("1");
     }
