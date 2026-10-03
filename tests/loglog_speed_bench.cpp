@@ -8,7 +8,7 @@
 #include <string>
 #include <vector>
 
-#include "logapprox.h"
+#include "loglogapprox.h"
 
 struct Options {
     std::size_t samples = 1'000'000;
@@ -21,7 +21,7 @@ Options parseOptions(int argc, char** argv) {
         if (arg == "--samples" && i + 1 < argc) {
             options.samples = static_cast<std::size_t>(std::stoul(argv[++i]));
         } else if (arg == "--help") {
-            std::cout << "Usage: log_speed_bench [--samples N]\n";
+            std::cout << "Usage: loglog_speed_bench [--samples N]\n";
             std::exit(0);
         } else {
             std::cerr << "Unknown argument: " << arg << "\n";
@@ -42,32 +42,30 @@ int main(int argc, char** argv) {
     values.reserve(options.samples);
     for (std::size_t i = 0; i < options.samples; ++i) {
         const double fraction = static_cast<double>(i) / static_cast<double>(std::max<std::size_t>(1, options.samples - 1));
-        values.push_back(0.5 + fraction);
+        const double x = std::exp2(2.0 + 20.0 * fraction);
+        values.push_back(x);
     }
 
     double stdSum = 0.0;
     double fastSum = 0.0;
     double maxAbsError = 0.0;
 
-    std::vector<double> referenceLogs;
-    referenceLogs.reserve(values.size());
+    std::vector<double> referenceValues;
+    referenceValues.reserve(values.size());
 
     const auto stdStart = std::chrono::steady_clock::now();
     for (double value : values) {
-        const double reference = std::log(value);
-        //referenceLogs.push_back(reference);
+        const double reference = std::log2(std::log2(value));
+        //referenceValues.push_back(reference);
         stdSum += reference;
     }
     const auto stdEnd = std::chrono::steady_clock::now();
 
     const auto fastStart = std::chrono::steady_clock::now();
-    //for (std::size_t i = 0; i < values.size(); ++i) {
-    for (double value : values) {
-        //const double approx = fastLn(values[i], &fastLog2p6<double>);
-        const double approx = fastLn(value, &fastLog2p3<double>);
-
+    for (std::size_t i = 0; i < values.size(); ++i) {
+        const double approx = fastLog2Log2(values[i]);
         fastSum += approx;
-       // const double error = std::abs(referenceLogs[i] - approx);
+       // const double error = std::abs(referenceValues[i] - approx);
        // maxAbsError = std::max(maxAbsError, error);
     }
     const auto fastEnd = std::chrono::steady_clock::now();
@@ -78,13 +76,13 @@ int main(int argc, char** argv) {
         ? static_cast<double>(stdDurationUs) / static_cast<double>(fastDurationUs)
         : 0.0;
 
-    std::cout << std::setprecision(16);
+    std::cout << std::setprecision(17);
     std::cout << "samples=" << options.samples << "\n";
-    std::cout << "std::log total=" << stdSum << "\n";
-    std::cout << "fastLog total=" << fastSum << "\n";
+    std::cout << "std::log2(log2(x)) total=" << stdSum << "\n";
+    std::cout << "fastLog2Log2 total=" << fastSum << "\n";
     std::cout << "max_abs_error=" << maxAbsError << "\n";
-    std::cout << "std::log time_us=" << stdDurationUs << "\n";
-    std::cout << "fastLog time_us=" << fastDurationUs << "\n";
+    std::cout << "std::log2(log2(x)) time_us=" << stdDurationUs << "\n";
+    std::cout << "fastLog2Log2 time_us=" << fastDurationUs << "\n";
     std::cout << "speedup=" << speedup << "x\n";
 
     return 0;
