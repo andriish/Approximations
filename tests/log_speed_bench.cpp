@@ -61,19 +61,26 @@ int main(int argc, char** argv) {
     const auto stdEnd = std::chrono::steady_clock::now();
 
     const auto fastStart = std::chrono::steady_clock::now();
-    //for (std::size_t i = 0; i < values.size(); ++i) {
     for (double value : values) {
-        //const double approx = fastLn(values[i], &fastLog2p6<double>);
         const double approx = fastLn(value, &fastLog2p3<double>);
-
         fastSum += approx;
-       // const double error = std::abs(referenceLogs[i] - approx);
-       // maxAbsError = std::max(maxAbsError, error);
     }
     const auto fastEnd = std::chrono::steady_clock::now();
 
+    for (std::size_t i = 0; i < values.size(); ++i) {
+        const double reference = std::log(values[i]);
+        const double approx = fastLn(values[i], &fastLog2p3<double>);
+        maxAbsError = std::max(maxAbsError, std::abs(reference - approx));
+    }
+
     const auto stdDurationUs = std::chrono::duration_cast<std::chrono::microseconds>(stdEnd - stdStart).count();
     const auto fastDurationUs = std::chrono::duration_cast<std::chrono::microseconds>(fastEnd - fastStart).count();
+    const double stdCallsPerUs = stdDurationUs > 0
+        ? static_cast<double>(values.size()) / static_cast<double>(stdDurationUs)
+        : 0.0;
+    const double fastCallsPerUs = fastDurationUs > 0
+        ? static_cast<double>(values.size()) / static_cast<double>(fastDurationUs)
+        : 0.0;
     const double speedup = fastDurationUs > 0
         ? static_cast<double>(stdDurationUs) / static_cast<double>(fastDurationUs)
         : 0.0;
@@ -85,6 +92,8 @@ int main(int argc, char** argv) {
     std::cout << "max_abs_error=" << maxAbsError << "\n";
     std::cout << "std::log time_us=" << stdDurationUs << "\n";
     std::cout << "fastLog time_us=" << fastDurationUs << "\n";
+    std::cout << "std::log calls_per_us=" << stdCallsPerUs << "\n";
+    std::cout << "fastLog calls_per_us=" << fastCallsPerUs << "\n";
     std::cout << "speedup=" << speedup << "x\n";
 
     return 0;

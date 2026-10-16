@@ -89,10 +89,10 @@ inline double fastLog2Log2(double x) noexcept {
     // 1 + y is in [1, 2) and can be handled by the same fastLog2pN-style formula,
     // without another frexp() and without extra checks.
     const double e = mantissa * 2.0;
-    const double y = detail::fast_log2_mantissa_1_to_2_order3(e) / static_cast<double>(integer_m);
+    const double y = detail::fast_log2_mantissa_1_to_2_order2(e) / static_cast<double>(integer_m);
 
     return detail::log2_small_uint(static_cast<std::uint32_t>(integer_m)) +
-           detail::fast_log2_mantissa_1_to_2_order3(1.0 + y);
+           detail::fast_log2_mantissa_1_to_2_order2(1.0 + y);
 }
 
 extern "C" {

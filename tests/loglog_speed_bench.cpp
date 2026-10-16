@@ -50,13 +50,9 @@ int main(int argc, char** argv) {
     double fastSum = 0.0;
     double maxAbsError = 0.0;
 
-    std::vector<double> referenceValues;
-    referenceValues.reserve(values.size());
-
     const auto stdStart = std::chrono::steady_clock::now();
     for (double value : values) {
-        const double reference = std::log2(std::log2(value));
-        //referenceValues.push_back(reference);
+        const double reference = std::log(std::log(value));
         stdSum += reference;
     }
     const auto stdEnd = std::chrono::steady_clock::now();
@@ -65,24 +61,37 @@ int main(int argc, char** argv) {
     for (std::size_t i = 0; i < values.size(); ++i) {
         const double approx = fastLog2Log2(values[i]);
         fastSum += approx;
-       // const double error = std::abs(referenceValues[i] - approx);
-       // maxAbsError = std::max(maxAbsError, error);
     }
     const auto fastEnd = std::chrono::steady_clock::now();
 
+    for (std::size_t i = 0; i < values.size(); ++i) {
+        const double reference = std::log(std::log(values[i]));
+        const double approx = fastLog2Log2(values[i]);
+        maxAbsError = std::max(maxAbsError, std::abs(reference - approx));
+    }
+
     const auto stdDurationUs = std::chrono::duration_cast<std::chrono::microseconds>(stdEnd - stdStart).count();
     const auto fastDurationUs = std::chrono::duration_cast<std::chrono::microseconds>(fastEnd - fastStart).count();
+    const double stdCallsPerUs = stdDurationUs > 0
+        ? static_cast<double>(values.size()) / static_cast<double>(stdDurationUs)
+        : 0.0;
+    const double fastCallsPerUs = fastDurationUs > 0
+        ? static_cast<double>(values.size()) / static_cast<double>(fastDurationUs)
+        : 0.0;
     const double speedup = fastDurationUs > 0
         ? static_cast<double>(stdDurationUs) / static_cast<double>(fastDurationUs)
         : 0.0;
 
     std::cout << std::setprecision(17);
     std::cout << "samples=" << options.samples << "\n";
-    std::cout << "std::log2(log2(x)) total=" << stdSum << "\n";
-    std::cout << "fastLog2Log2 total=" << fastSum << "\n";
+    std::cout << "implementation: C++ loglog\n";
+    std::cout << "log(log(x)) total=" << stdSum << "\n";
+    std::cout << "C++ fast loglog total=" << fastSum << "\n";
     std::cout << "max_abs_error=" << maxAbsError << "\n";
-    std::cout << "std::log2(log2(x)) time_us=" << stdDurationUs << "\n";
-    std::cout << "fastLog2Log2 time_us=" << fastDurationUs << "\n";
+    std::cout << "log(log(x)) time_us=" << stdDurationUs << "\n";
+    std::cout << "C++ fast loglog time_us=" << fastDurationUs << "\n";
+    std::cout << "log(log(x)) calls_per_us=" << stdCallsPerUs << "\n";
+    std::cout << "C++ fast loglog calls_per_us=" << fastCallsPerUs << "\n";
     std::cout << "speedup=" << speedup << "x\n";
 
     return 0;
